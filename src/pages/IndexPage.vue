@@ -4,7 +4,7 @@
       <div class="q-mb-xl">
         <q-input v-model="tempData.name" label="姓名" />
         <q-input v-model="tempData.age" label="年齡" />
-        <q-btn color="primary" class="q-mt-md" @click="handleAdd">新增</q-btn>
+        <q-btn color="primary" class="q-mt-md" @click="handleAdd">更新</q-btn>
       </div>
 
       <q-table
@@ -12,7 +12,7 @@
         bordered
         ref="tableRef"
         :rows="blockData"
-        :columns="(tableConfig as QTableProps['columns'])"
+        :columns="tableConfig"
         row-key="id"
         hide-pagination
         separator="cell"
@@ -96,9 +96,9 @@ interface btnType {
   status: string;
 }
 const isEditDialogOpen = ref(false);
-const selectedMember = ref({ name: '', age: '' });
+const selectedMember = ref({ name: '', age: 0 });
 const blockData = ref([]);
-const tableConfig = ref([
+const tableConfig = ref<QTableProps['columns']>([
   {
     label: '姓名',
     name: 'name',
@@ -130,7 +130,10 @@ const tempData = ref({
   age: '',
 });
 
-async function handleClickOption(btn, data) {
+async function handleClickOption(
+  btn: btnType,
+  data: { id: string; name: string; age: number }
+) {
   if (btn.status === 'edit') {
     selectedMember.value = { ...data };
     isEditDialogOpen.value = true;
@@ -144,7 +147,20 @@ async function handleClickOption(btn, data) {
     }
   }
 }
-const updateMember = async (updatedData) => {
+const updateMember = async (updatedData: {
+  id: string;
+  name: string;
+  age: number;
+}) => {
+  if (
+    updatedData.name === '' ||
+    isNaN(Number(updatedData.age)) ||
+    !Number.isInteger(Number(updatedData.age)) ||
+    Number(updatedData.age) <= 0
+  ) {
+    alert('請輸入姓名和年齡');
+    return;
+  }
   const res = await axios.patch(
     `https://dahua.metcfire.com.tw/api/CRUDTest`,
     updatedData
@@ -156,6 +172,16 @@ const updateMember = async (updatedData) => {
 };
 
 const handleAdd = async () => {
+  if (
+    tempData.value.name === '' ||
+    isNaN(Number(tempData.value.age)) ||
+    tempData.value.age === '' ||
+    !Number.isInteger(Number(tempData.value.age)) ||
+    Number(tempData.value.age) <= 0
+  ) {
+    alert('請輸入姓名和年齡');
+    return;
+  }
   try {
     await axios.post(
       'https://dahua.metcfire.com.tw/api/CRUDTest',
