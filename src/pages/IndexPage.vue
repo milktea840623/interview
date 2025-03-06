@@ -138,12 +138,14 @@ async function handleClickOption(
     selectedMember.value = { ...data };
     isEditDialogOpen.value = true;
   } else {
-    alert('確認刪除');
-    const res = await axios.delete(
-      `https://dahua.metcfire.com.tw/api/CRUDTest/${data.id}`
-    );
-    if (res.status === 200) {
-      handleGet();
+    const isDelete = confirm('確認刪除');
+    if (isDelete) {
+      const res = await axios.delete(
+        `https://dahua.metcfire.com.tw/api/CRUDTest/${data.id}`
+      );
+      if (res.status === 200) {
+        handleGet();
+      }
     }
   }
 }
